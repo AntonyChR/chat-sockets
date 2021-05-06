@@ -1,16 +1,14 @@
 const {Socket} = require('net');
-const readLine = require('readline').createInterface({
+
+const input = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout,
 });
 
-
-const END = "END";
 const error = (message)=>{
     console.log(message);
     process.exit(1);
 }
-
 
 const connect = (host, port)=>{
     console.log(`Connecting to ${host}:${port}`);
@@ -22,14 +20,14 @@ const connect = (host, port)=>{
     socket.on("connect", ()=>{
 	console.log("Connected");
 
-	readLine.question("Choose your name: ", (username)=>{
+	input.question("Enter Username: ", (username)=>{
 	    socket.write(username);
-	    console.log("Type any message to send it, type END to finish");
+	    console.log("Write the message and press enter to send. send END to close the connection");
 
 	})
-	readLine.on("line", (msg) =>{
+	input.on("line", (msg) =>{
 		socket.write(msg);
-		if(msg === END){
+		if(msg === "END"){
 	            socket.end();
 		    console.log("Disconnected");
 	    	    process.exit(0);
@@ -41,7 +39,6 @@ const connect = (host, port)=>{
     	});
 
     });
-
     
     socket.on("error", (err)=>{
 	error(err.message);
@@ -55,10 +52,7 @@ const main = () =>{
     }
 
     let [, , host, port] = process.argv;
-
-    if(isNaN(port)){
-	error(`Invalid port ${port}`)
-    }
+    port = !isNaN(port) ? Number(port): error(`Invalid port: ${port}`);
     port = Number(port);
 
     connect(host, port);
